@@ -4,14 +4,17 @@
         {
             "label": "compile",
             "type": "shell",
-            "command": "g++ main.cpp -o main -g",
+            "command": "make",
             "problemMatcher": [],
-            "group": "build"
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
         {
             "label": "run",
             "type": "shell",
-            "command": "./main",
+            "command": "./bin/main",
             "problemMatcher": [],
             "group": {
                 "kind": "test",
