@@ -1,3 +1,1 @@
-abc
-def
-ghi
+Giovanni 100 6O 3P 10E 11O 1O

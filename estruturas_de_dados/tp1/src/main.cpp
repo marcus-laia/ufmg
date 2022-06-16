@@ -9,7 +9,7 @@ int main(int argc, char const *argv[])
 {
     string filename = "./src/entrada.txt";
     ifstream fileHandle(filename);
-    string content;
+    string line;
 
     // numero de rodadas
     int n = 0;
@@ -20,10 +20,16 @@ int main(int argc, char const *argv[])
     // valor do pingo
     int p = 0;
 
+    string aux;
 
-    while (getline(fileHandle, content))
+
+    while (getline(fileHandle, line))
     {
-        cout << content;
+        istringstream ss(line);
+        while ((ss >> aux))
+        {
+            cout << aux << endl;
+        }
     }    
 
     return 0;
