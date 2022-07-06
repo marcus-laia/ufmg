@@ -1,4 +1,6 @@
 #include <iostream>
+#include <cctype>
+#include <sstream>
 #include <string.h>
 
 using namespace std;
@@ -7,62 +9,22 @@ class Palavra
 {
 private:
     int ocorrencias;
+    int chave;
     string str;
-
 public:
     Palavra();
-    Palavra(string palav);
-    string get_str() { return str; }
-    
-    int get_cod(int idx, int chaves[]);
-    int compara(Palavra outra, int chaves[]);
+    Palavra(string palav, int key);
 
 friend class ConjuntoPalavras;
 };
 
 Palavra::Palavra() {}
 
-Palavra::Palavra(string palav)
+Palavra::Palavra(string palav, int key)
 {
     str = palav;
+    chave = key;
     ocorrencias = 0;
-}
-
-int Palavra::get_cod(int idx, int chaves[])
-{
-    int cod = -1;
-
-    // cod = ascii do caractere apontado pelo indice
-    cod = (int)str[idx];
-
-    // se for uma letra
-    if (cod >= 97 && cod <= 122) 
-        // se o caractere foi registrado na ordem dada, atribui o rank
-        if (chaves[cod-97] != -1) cod = chaves[cod-97];
-
-    return cod;
-}
-
-int Palavra::compara(Palavra outra, int chaves[])
-{
-    int tam = str.length();
-    int tam_outra = outra.get_str().length();
-    int menor = 0;
-
-    if (tam <= tam_outra) menor = tam;
-    else menor = tam_outra;
-
-    for (int i = 0; i < menor; i++)
-    {
-        if (get_cod(i, chaves) == outra.get_cod(i, chaves)) continue;
-        else return (get_cod(i, chaves) - outra.get_cod(i, chaves));
-    }    
-    // se nao for encontrada diferenca em toda a menor palavra, indica o menor rank pelo tamanho
-    if (tam < tam_outra) return -1;
-    else if (tam > tam_outra) return 1;
-    // se forem iguais, retorna 0
-    else return 0;
-
 }
 
 class ConjuntoPalavras
@@ -70,15 +32,12 @@ class ConjuntoPalavras
 private:
     Palavra palavras[10];
     int num_palavras;
-    int chaves[26];
 
     void ordena(int esq, int dir);
     void particao(int esq, int dir, int *i, int *j);
 public:
     ConjuntoPalavras();
     ~ConjuntoPalavras();
-    void setChaves(string ordem);
-
     void Adiciona(Palavra palav);
     int Busca(string palav);
     void Quicksort();
@@ -89,34 +48,10 @@ ConjuntoPalavras::ConjuntoPalavras()
 {
     //palavras = Palavra[10];
     num_palavras = 0;
-    for (int i = 0; i < 26; i++) chaves[i] = -1;
 }
 
 ConjuntoPalavras::~ConjuntoPalavras()
 {
-}
-
-void ConjuntoPalavras::setChaves(string ordem)
-{
-    int tam_ordem = ordem.length();
-    int count = 0;
-
-    for (int i = 0; i< tam_ordem; i++)
-    {
-        if (ordem[i] != ' '){
-            // obtem o codigo ascii da letra
-            int cod = (int)ordem[i];
-            // assumindo entrada correta, se for letra maiuscula
-            if (cod < 91) cod -= 65;
-            // se for minuscula
-            else cod -= 97;
-
-            // a chave na posicao determinada pela operacao com o codigo ascii
-            // sera igual ao indice da letra na nova ordem lexicografica
-            chaves[cod] = count;
-            count ++;
-        }
-    }
 }
 
 void ConjuntoPalavras::Adiciona(Palavra palav)
@@ -160,10 +95,8 @@ void ConjuntoPalavras::particao(int esq, int dir, int *i, int *j)
 
     do
     {
-        // while (pivo.chave > palavras[*i].chave) (*i)++;
-        // while (pivo.chave < palavras[*j].chave) (*j)--;
-        while (pivo.compara(palavras[*i], chaves) > 0) (*i)++;
-        while (pivo.compara(palavras[*j], chaves) < 0) (*j)--;
+        while (pivo.chave > palavras[*i].chave) (*i)++;
+        while (pivo.chave < palavras[*j].chave) (*j)--;
         if (*i <= *j)
         {
             aux_troca = palavras[*i]; palavras[*i] = palavras[*j]; palavras[*j] = aux_troca;
@@ -189,11 +122,11 @@ void ConjuntoPalavras::Print()
 {
     for (int i = 0; i < num_palavras; i++)
     {
-        cout << palavras[i].str << " ";
-        cout << palavras[i].ocorrencias;
+        cout << "Palavra: " << palavras[i].str;
+        cout << " Rank: " << palavras[i].chave;
+        cout << " Count: " << palavras[i].ocorrencias;
         cout << "\n";
     }
-    cout << "#FIM\n";
 }
 
 
@@ -220,7 +153,7 @@ void get_keys(string ordem, int keys[])
     }
 }
 
-void parse(string texto, ConjuntoPalavras *todas_palavras)
+void parse(string texto, int keys[], ConjuntoPalavras *todas_palavras)
 {
     int tam_texto = texto.length();
     
@@ -253,9 +186,19 @@ void parse(string texto, ConjuntoPalavras *todas_palavras)
                 else continue;
             }
 
-            Palavra auxPalavra(palav);
+            // cod = primeiro caractere
+            cod = (int)palav[0];
+            // se for uma letra
+            if (cod >= 97 && cod <= 122) 
+                // se o caractere foi registrado na ordem dada
+                if (keys[cod-97] != -1) cod = keys[cod-97]; //cod-97 vai indexar a lista de chaves
+
+            Palavra auxPalavra(palav, cod);
 
             todas_palavras->Adiciona(auxPalavra);
+
+            // cout << "adiciona palavra " << palav;
+            // cout << " com codigo " << cod << "\n";
 
             palav = "";
         }
@@ -267,11 +210,12 @@ int main()
     string ordem = "Z Y X W V U T S R Q P O N M L K J I H G F E D C B A";
     string texto = "Era uma vez UMA gata xadrez.";
 
-    ConjuntoPalavras todasPalavras;
-    todasPalavras.setChaves(ordem);
+    int keys[26] = {-1};
 
-    // get_keys(ordem, keys);
-    parse(texto, &todasPalavras);
+    ConjuntoPalavras todasPalavras;
+
+    get_keys(ordem, keys);
+    parse(texto, keys, &todasPalavras);
 
     todasPalavras.Quicksort();
     todasPalavras.Print();

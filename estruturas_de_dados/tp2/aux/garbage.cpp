@@ -176,3 +176,19 @@ int main()
     
     return 0;
 }
+
+    // int i;
+    // int esq = 0;
+    // int dir = num_palavras - 1;
+
+    // do
+    // {
+    //     i = (esq + dir) / 2;
+    //     cout << "comparando " << palav << " com " << palavras[i].str << " temos " << palav.compare(palavras[i].str) << endl;
+    //     if (palav.compare(palavras[i].str) > 0)
+    //         esq = i + 1;
+    //     else if (palav.compare(palavras[i].str) < 0)
+    //         dir = i - 1;
+    //     else
+    //         return i;
+    // } while (esq <= dir);
