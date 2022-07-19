@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include "message.h"
 
@@ -29,16 +31,18 @@ class binaryTree
 {
 private:
     node *root;
-    void insertRec(node* &p, message email);
-    void removeRec(node* &p, int key);
+    int insertRec(node* &p, message email);
+    int removeRec(node* &p, int key);
+    message searchRec(node* &p, int key);
     void printRec(node* p);
     void delRec(node *p);
     void antecessor(node *q, node *&r);
 public:
     binaryTree();
     ~binaryTree();
-    void insert(message email);
-    void remove(int key);
+    int insert(message email);
+    int remove(int key);
+    message search(int key);
     void print();
     void clear();
 };
@@ -52,30 +56,31 @@ binaryTree::~binaryTree()
 {
 }
 
-void binaryTree::insertRec(node* &p, message email)
+int binaryTree::insertRec(node* &p, message email)
 {
     if (p==NULL)
     {
         p = new node();
         p->msg = email;
+        return 1;
     }
     else
     {
         if (email.key < p->msg.key)
         {
-            insertRec(p->esq, email);
+            return insertRec(p->esq, email);
         }
         else if (email.key > p->msg.key)
         {
-            insertRec(p->dir, email);
+            return insertRec(p->dir, email);
         }
-        else cout << "JA EXISTE\n";
+        else return 0;
     }     
 }
 
-void binaryTree::insert(message email)
+int binaryTree::insert(message email)
 {
-    insertRec(root, email);
+    return insertRec(root, email);
 }
 
 void binaryTree::antecessor(node *q, node *&r)
@@ -93,25 +98,26 @@ void binaryTree::antecessor(node *q, node *&r)
     }
 }
 
-void binaryTree::removeRec(node* &p, int key)
+int binaryTree::removeRec(node* &p, int key)
 {
     if (p==NULL)
     {
-        cout << "NAO EXISTE\n";
+        return 0;
     }
     else
     {
         if (key < p->msg.key)
         {
-            removeRec(p->esq, key);
+            return removeRec(p->esq, key);
         }
         else if (key > p->msg.key)
         {
-            removeRec(p->dir, key);
+            return removeRec(p->dir, key);
         }
         else
         {
             node *aux;
+
             if (p->dir == NULL)
             {
                 aux = p;
@@ -125,13 +131,42 @@ void binaryTree::removeRec(node* &p, int key)
                 free(aux);
             }
             else antecessor(p, p->esq);
+
+            return 1;
         }
     }     
 }
 
-void binaryTree::remove(int key)
+int binaryTree::remove(int key)
 {
-    removeRec(root, key);
+    return removeRec(root, key);
+}
+
+message binaryTree::searchRec(node* &p, int key)
+{
+    if (p==NULL)
+    {
+        message aux;
+        aux.setKey(-1);
+        return aux;
+    }
+    if (key < p->msg.key)
+    {
+        return searchRec(p->esq, key);
+    }
+    else if (key > p->msg.key)
+    {
+        return searchRec(p->dir, key);
+    }
+    else
+    {
+        return p->msg;
+    }    
+}
+
+message binaryTree::search(int key)
+{
+    return searchRec(root, key);
 }
 
 void binaryTree::printRec(node *p)
