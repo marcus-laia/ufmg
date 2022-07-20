@@ -33,6 +33,8 @@ test: $(EXE)
 	./compare 3
 	$(EXE) -i input_tp3/entrada_4.txt -o out/output_4.txt
 	./compare 4
+	$(EXE) -i input_tp3/entrada_test.txt -o out/output_test.txt
+	./compare test
 
 clean:
 	@rm -rf $(OBJ_FOLDER)* 

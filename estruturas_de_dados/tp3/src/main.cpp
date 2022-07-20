@@ -10,20 +10,14 @@
 
 using namespace std;
 
-// int main(int argc, char const *argv[])
-// {
-//     /* code */
-//     return 0;
-// }
-
 int main(int argc, char **argv)
 {
+    // le os parametros passados por linha de comando
     argParser parser;
     parser.parse_args(argc, argv);
 
+    // abre o arquivo de entrada
     ifstream inputFile(parser.input_path);
-    string fileLine;
-    string fileWord;
 
     // identificador da operacao
     string op;
@@ -33,29 +27,39 @@ int main(int argc, char **argv)
     int U, E;
     int N = -1;
 
+    // variavel auxiliar para ler o arquivo
     string text = "";
 
+    // le o tamanho da tabela hash
     inputFile >> M;
-    cout << M << endl;
 
+    if (M==0)
+    {
+        cout << "ENTRADA INVALIDA\n";
+        return 0;
+    }
+
+    // cria o objeto da tabela hash
     Hash hash(M);
+    // abre o arquivo de saida
     hash.openLogFile(parser.output_path);
 
+    // enquanto conseguir ler o arquivo (primeira palavra = operacao)
     while (inputFile >> op)
     {
-        inputFile >> U >> E;        
-        // cout << "\nTRACK: " << op << " / " << U << " / " << E << " / " << N << endl;
+        // le os identificadores de ususario e email
+        inputFile >> U >> E;
         if (op == "ENTREGA")
         {
+            // le o numero de palavras
             inputFile >> N;
+            // le o texto da mensagem
             getline(inputFile, text);
             text.erase(0, 1);
-            // cout << "\nTRACK: " << text << "\n";
-
+            // cria uma nova mensagem
             message aux_msg(U, E, text);
-            // cout << "\nTRACK: " << "CRIOU\n";
+            // entrega a mensagem (armazena no servidor simulado)
             hash.entrega(aux_msg);
-            // cout << "\nTRACK: " << "ENTREGOU\n";
         }
         else if (op == "CONSULTA")
         {
@@ -70,8 +74,9 @@ int main(int argc, char **argv)
             cout << "OPERACAO INVALIDA\n";
         }
     }
-
+    // fecha o arquivo de entrada
     inputFile.close();
+    // fecha o arquivo de saida
     hash.closeLogFile();
 
     return 0;

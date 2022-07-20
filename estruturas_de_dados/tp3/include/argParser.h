@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <string.h>
-// #include "msgassert.h"
 #include <iostream>
 using namespace std;
 
@@ -9,8 +8,6 @@ class argParser
 {
 private:
 public:
-    char lognome[100];
-    int regmem;
     char input_path[100], output_path[100];
     
     argParser();
@@ -23,7 +20,6 @@ argParser::argParser()
 {
 	input_path[0] = 0;
 	output_path[0] = 0;
-    lognome[0] = 0;
 }
 
 // variaveis globais para opcoes
@@ -54,7 +50,7 @@ void argParser::parse_args(int argc, char **argv)
 
 	// getopt - letra indica a opcao, : junto a letra indica parametro
 	// no caso de escolher mais de uma operacao, vale a ultima
-	while ((c = getopt(argc, argv, "i:o:p:lh")) != EOF)
+	while ((c = getopt(argc, argv, "i:o:h")) != EOF)
 	{
 
 		switch (c)
@@ -65,12 +61,6 @@ void argParser::parse_args(int argc, char **argv)
 		case 'o':
 			strcpy(output_path, optarg);
 			break;
-		case 'p':
-			strcpy(lognome, optarg);
-			break;
-		case 'l':
-			regmem = 1;
-			break;
         case 'h':
 			uso();
 			exit(1);
@@ -80,7 +70,4 @@ void argParser::parse_args(int argc, char **argv)
 			exit(1);
 		}
 	}
-	// verificacao da consistencia das opcoes
-	// erroAssert(strlen(lognome) > 0,
-	// 		   "matop - nome de arquivo de registro de acesso tem que ser definido");
 }

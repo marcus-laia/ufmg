@@ -41,7 +41,7 @@ int main(int argc, char **argv)
             texto += " ";
             texto += linhaArq;
         }
-        if (linhaArq.compare("#ORDEM") == 0) get_ordem = true;   
+        if (linhaArq.compare("#ORDEM") == 0) get_ordem = true;
         if (linhaArq.compare("#TEXTO") == 0) get_texto = true;
     }
 

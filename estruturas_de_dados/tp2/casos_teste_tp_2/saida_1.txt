@@ -1,0 +1,6 @@
+xadrez 1
+vez 1
+uma 2
+gata 1
+era 1
+#FIM

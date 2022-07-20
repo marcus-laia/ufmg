@@ -29,9 +29,12 @@ void compareFiles(string path1, string path2)
 
 int main(int argc, char const *argv[])
 {
-    char outname[20];
-    sprintf(outname, "./output/%s.txt",argv[1]);
-    // cout << outname << endl;
-    compareFiles("./output.txt", outname);
+    char outname[30];    
+    char myout[30];
+
+    sprintf(outname, "./test_cases_tp2/s%s.txt",argv[1]);
+    sprintf(myout, "./out/output_%s.txt",argv[1]);
+
+    compareFiles(myout, outname);
     return 0;
 }

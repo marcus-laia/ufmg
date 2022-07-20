@@ -1,0 +1,14 @@
+a 1
+abelha 2
+correa 1
+dois 1
+e 1
+eu 1
+fui 1
+guarda 1
+guarda-chuva- 1
+missa 1
+nao 1
+salva-vidas 1
+viva 1
+#FIM
