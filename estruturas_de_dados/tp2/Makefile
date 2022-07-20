@@ -23,48 +23,46 @@ all:  build clean
 
 build: $(OBJ)
 	$(CC) $(CXXFLAGS) -o $(BIN_FOLDER)$(TARGET) $(OBJ)
+	$(CC) $(CXXFLAGS) ./tests/check/compareFiles.cpp -o ./tests/check/compare
 
 test: $(EXE)
-	$(EXE) -i input/1.txt -m 3 -s 4 -o out/output_1.txt
-	./compare 1
-	$(EXE) -i input/2.txt -m 3 -s 4 -o out/output_2.txt
-	./compare 2
-	$(EXE) -i input/3.txt -m 3 -s 4 -o out/output_3.txt
-	./compare 3
-	$(EXE) -i input/4.txt -m 3 -s 4 -o out/output_4.txt
-	./compare 4
-	$(EXE) -i input/5.txt -m 3 -s 4 -o out/output_5.txt
-	./compare 5
-	$(EXE) -i input/6.txt -m 3 -s 4 -o out/output_6.txt
-	./compare 6
-	$(EXE) -i input/7.txt -m 3 -s 4 -o out/output_7.txt
-	./compare 7
-	$(EXE) -i input/8.txt -m 3 -s 4 -o out/output_8.txt
-	./compare 8
-	$(EXE) -i input/9.txt -m 3 -s 4 -o out/output_9.txt
-	./compare 9
-	$(EXE) -i input/10.txt -m 3 -s 4 -o out/output_10.txt
-	./compare 10
-
-cases: $(EXE)
-	$(EXE) -i test_cases_tp2/e1.txt -m 3 -s 4 -o out/output_1.txt
-	./compare 1
-	$(EXE) -i test_cases_tp2/e2.txt -m 3 -s 4 -o out/output_2.txt
-	./compare 2
-	$(EXE) -i test_cases_tp2/e3.txt -m 3 -s 4 -o out/output_3.txt
-	./compare 3
-	$(EXE) -i test_cases_tp2/e4.txt -m 3 -s 4 -o out/output_4.txt
-	./compare 4
-	$(EXE) -i test_cases_tp2/e5.txt -m 3 -s 4 -o out/output_5.txt
-	./compare 5
-	$(EXE) -i test_cases_tp2/e6.txt -m 3 -s 4 -o out/output_6.txt
-	./compare 6
-	$(EXE) -i test_cases_tp2/e7.txt -m 3 -s 4 -o out/output_7.txt
-	./compare 7
-	$(EXE) -i test_cases_tp2/e8.txt -m 3 -s 4 -o out/output_8.txt
-	./compare 8
+	$(EXE) -i ./tests/input/e1.txt -m 3 -s 4 -o ./tests/output/out_e1.txt
+	./tests/check/compare e1
+	$(EXE) -i ./tests/input/e2.txt -m 3 -s 4 -o ./tests/output/out_e2.txt
+	./tests/check/compare e2
+	$(EXE) -i ./tests/input/e3.txt -m 3 -s 4 -o ./tests/output/out_e3.txt
+	./tests/check/compare e3
+	$(EXE) -i ./tests/input/e4.txt -m 3 -s 4 -o ./tests/output/out_e4.txt
+	./tests/check/compare e4
+	$(EXE) -i ./tests/input/e5.txt -m 3 -s 4 -o ./tests/output/out_e5.txt
+	./tests/check/compare e5
+	$(EXE) -i ./tests/input/e6.txt -m 3 -s 4 -o ./tests/output/out_e6.txt
+	./tests/check/compare e6
+	$(EXE) -i ./tests/input/e7.txt -m 3 -s 4 -o ./tests/output/out_e7.txt
+	./tests/check/compare e7
+	$(EXE) -i ./tests/input/e8.txt -m 3 -s 4 -o ./tests/output/out_e8.txt
+	./tests/check/compare e8
+	$(EXE) -i ./tests/input/e9.txt -m 3 -s 4 -o ./tests/output/out_e9.txt
+	./tests/check/compare e9
+	$(EXE) -i ./tests/input/e10.txt -m 3 -s 4 -o ./tests/output/out_e10.txt
+	./tests/check/compare e10
+	$(EXE) -i ./tests/input/t1.txt -m 3 -s 4 -o ./tests/output/out_t1.txt
+	./tests/check/compare t1
+	$(EXE) -i ./tests/input/t2.txt -m 3 -s 4 -o ./tests/output/out_t2.txt
+	./tests/check/compare t2
+	$(EXE) -i ./tests/input/t3.txt -m 3 -s 4 -o ./tests/output/out_t3.txt
+	./tests/check/compare t3
+	$(EXE) -i ./tests/input/t4.txt -m 3 -s 4 -o ./tests/output/out_t4.txt
+	./tests/check/compare t4
+	$(EXE) -i ./tests/input/t5.txt -m 3 -s 4 -o ./tests/output/out_t5.txt
+	./tests/check/compare t5
+	$(EXE) -i ./tests/input/t6.txt -m 3 -s 4 -o ./tests/output/out_t6.txt
+	./tests/check/compare t6
+	$(EXE) -i ./tests/input/t7.txt -m 3 -s 4 -o ./tests/output/out_t7.txt
+	./tests/check/compare t7
+	$(EXE) -i ./tests/input/t8.txt -m 3 -s 4 -o ./tests/output/out_t8.txt
+	./tests/check/compare t8
 
 clean:
 	@rm -rf $(OBJ_FOLDER)* 
 
-# $(BIN_FOLDER)*
