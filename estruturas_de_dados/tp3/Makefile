@@ -23,18 +23,19 @@ all:  build clean
 
 build: $(OBJ)
 	$(CC) $(CXXFLAGS) -o $(BIN_FOLDER)$(TARGET) $(OBJ)
+	$(CC) $(CXXFLAGS) ./tests/check/compareFiles.cpp -o ./tests/check/compare
 
 test: $(EXE)
-	$(EXE) -i input_tp3/entrada_1.txt -o out/output_1.txt
-	./compare 1
-	$(EXE) -i input_tp3/entrada_2.txt -o out/output_2.txt
-	./compare 2
-	$(EXE) -i input_tp3/entrada_3.txt -o out/output_3.txt
-	./compare 3
-	$(EXE) -i input_tp3/entrada_4.txt -o out/output_4.txt
-	./compare 4
-	$(EXE) -i input_tp3/entrada_test.txt -o out/output_test.txt
-	./compare test
+	$(EXE) -i ./tests/input/input_1.txt -o tests/output/output_1.txt
+	./tests/check/compare 1
+	$(EXE) -i ./tests/input/input_2.txt -o tests/output/output_2.txt
+	./tests/check/compare 2
+	$(EXE) -i ./tests/input/input_3.txt -o tests/output/output_3.txt
+	./tests/check/compare 3
+	$(EXE) -i ./tests/input/input_4.txt -o tests/output/output_4.txt
+	./tests/check/compare 4
+	$(EXE) -i ./tests/input/input_test.txt -o tests/output/output_test.txt
+	./tests/check/compare test
 
 clean:
 	@rm -rf $(OBJ_FOLDER)* 

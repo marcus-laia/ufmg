@@ -1,9 +1,0 @@
-#ORDEM
-A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
-#TEXTO
-abe:lha guarda- chuva- dois
-salva-vidas não è guar!da
-à missa eu fui
-abelha
-
-viva! corrêa

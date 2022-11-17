@@ -29,11 +29,11 @@ void compareFiles(string path1, string path2)
 
 int main(int argc, char const *argv[])
 {
-    char outname[30];    
+    char outname[35];    
     char myout[30];
 
-    sprintf(outname, "./tests/expected/%s.txt",argv[1]);
-    sprintf(myout, "./tests/output/out_%s.txt",argv[1]);
+    sprintf(outname, "./tests/expected/expected_%s.txt",argv[1]);
+    sprintf(myout, "./tests/output/output_%s.txt",argv[1]);
 
     compareFiles(myout, outname);
     return 0;
