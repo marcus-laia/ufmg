@@ -38,6 +38,7 @@ ALLEGRO_SAMPLE_INSTANCE *inst_openEndGame = NULL;
 ALLEGRO_SAMPLE_INSTANCE *inst_closeEndGame = NULL;
 //FONTES
 ALLEGRO_FONT *originTech25 = NULL;
+ALLEGRO_FONT *originTech14 = NULL;
 ALLEGRO_FONT *spaceAge25 = NULL;
 ALLEGRO_FONT *spaceAge40 = NULL;
 //IMAGENS
@@ -68,14 +69,11 @@ const float FPS = 100;
 const int SCREEN_W = 960;
 const int SCREEN_H = 540;
 
-const float VEL_TANQUE = 2.5;
+const float VEL_TANQUE = 3;
 const float PASSO_ANGULO = M_PI/90;
 
-const int SCREEN_WIDTH = 960;
-const int SCREEN_HEIGHT = 540;
-
 const float RAIO_CAMPO_FORCA = 40;
-const float VEL_TIRO = 8;
+const float VEL_TIRO = 10;
 const float RAIO_TIRO = 6;
 
 const float THETA = M_PI/4;
@@ -137,12 +135,25 @@ typedef struct Map
 	Bloco extra4;
 } Map;
 
+typedef struct AddOn
+{
+	Circulo corpo;
+	int tipo;
+	int addOnTime;
+} AddOn;
+
 typedef struct Player
 {
 	int id;
 	Tanque tanque;
 	int pontos;
+	AddOn p_addon;
 } Player;
+
+
+int randomEntreNums(int menor, int maior){
+	return (menor + rand()%(1+maior-menor));
+}
 
 void soundHandle(int condition, ALLEGRO_SAMPLE_INSTANCE *instance){
 	if(condition){
@@ -205,9 +216,9 @@ void initMapa(Map *mapa)
 		mapa->extra4.bottom_right.y = 440;			
 		break;
 	case 4:
-		mapa->central.top_left.x = 400;
+		mapa->central.top_left.x = 390;
 		mapa->central.top_left.y = 220;
-		mapa->central.bottom_right.x = 560;
+		mapa->central.bottom_right.x = 570;
 		mapa->central.bottom_right.y = 320;
 		//esq
 		mapa->extra1.top_left.x = 190;
@@ -291,41 +302,35 @@ void desenhaCenario(Map mapa)
 	}
 }
 
-void desenhaTanque(Tanque t) 
+void desenhaTanque(Player p) 
 {
-	al_draw_scaled_rotated_bitmap(t.spaceship,
-   								al_get_bitmap_width(t.spaceship)/2, 
-								al_get_bitmap_height(t.spaceship)/2,
-								t.centro.x, t.centro.y, 
-								2*t.campoForca.raio/(al_get_bitmap_width(t.spaceship)-20), 
-								2*t.campoForca.raio/(al_get_bitmap_height(t.spaceship)-20),
-								t.angulo-M_PI/2, 0);
+	al_draw_scaled_rotated_bitmap(p.tanque.spaceship,
+   								al_get_bitmap_width(p.tanque.spaceship)/2, 
+								al_get_bitmap_height(p.tanque.spaceship)/2,
+								p.tanque.centro.x, p.tanque.centro.y, 
+								2*p.tanque.campoForca.raio/(al_get_bitmap_width(p.tanque.spaceship)-20), 
+								2*p.tanque.campoForca.raio/(al_get_bitmap_height(p.tanque.spaceship)-20),
+								p.tanque.angulo-M_PI/2, 0);
 	
-	/* al_draw_scaled_bitmap(t.spaceship,
-					0, 0,                                		// source origin
-					al_get_bitmap_width(t.spaceship),     		// source width
-					al_get_bitmap_height(t.spaceship),    		// source height
-					t.centro.x-t.campoForca.raio, t.centro.y-t.campoForca.raio,				// target origin
-					2*t.campoForca.raio, 2*t.campoForca.raio,        		// target dimensions
-					0                                    		// flags
-				); */
-	/* al_draw_circle(t.centro.x, t.centro.y, t.campoForca.raio, t.cor, 1);
-	al_draw_filled_triangle(t.A.x + t.centro.x, t.A.y + t.centro.y,
-							t.B.x + t.centro.x, t.B.y + t.centro.y,
-							t.C.x + t.centro.x, t.C.y + t.centro.y,
-							t.cor); */
-	
-	if(t.s.ativo){		
-		al_draw_filled_circle(t.s.corpo.centro.x, t.s.corpo.centro.y, t.s.corpo.raio, t.s.cor);
+	if(p.tanque.s.ativo){		
+		al_draw_filled_circle(p.tanque.s.corpo.centro.x, p.tanque.s.corpo.centro.y, 
+								p.tanque.s.corpo.raio, p.tanque.s.cor);
 		al_draw_scaled_bitmap(shot,
 					0, 0,                                									// source origin
 					al_get_bitmap_width(shot),     											// source width
 					al_get_bitmap_height(shot),    											// source height
-					t.s.corpo.centro.x-t.s.corpo.raio, t.s.corpo.centro.y-t.s.corpo.raio,	// target origin
-					2*t.s.corpo.raio, 2*t.s.corpo.raio,        								// target dimensions
+					p.tanque.s.corpo.centro.x-p.tanque.s.corpo.raio, 
+					p.tanque.s.corpo.centro.y-p.tanque.s.corpo.raio,	// target origin
+					2*p.tanque.s.corpo.raio, 2*p.tanque.s.corpo.raio,        								// target dimensions
 					0                                    									// flags
 				);
 	}
+
+	if(p.p_addon.tipo!=0){
+		al_draw_circle(p.p_addon.corpo.centro.x,p.p_addon.corpo.centro.y,
+					p.p_addon.corpo.raio, al_map_rgb(rand()%256, rand()%256, rand()%256),2);
+	}
+
 }
 
 void initTiro(Tanque *t, int tipo)
@@ -356,7 +361,6 @@ void initTanque(Player *p)
 		break;
 	}
 	
-
 	p->tanque.cor = al_map_rgb(rand()%256, rand()%256, rand()%256);
 
 	float h = RAIO_CAMPO_FORCA * cos(THETA);
@@ -386,6 +390,10 @@ void initPlayer(Player *p){
 		case 1: */
 			p->pontos=0;
 			initTanque(p);
+			p->p_addon.tipo=0;
+			p->p_addon.addOnTime=0;
+			p->p_addon.corpo.centro = p->tanque.centro;
+			p->p_addon.corpo.raio = p->tanque.campoForca.raio;
 	/*	break;
 	} */
 }
@@ -489,24 +497,99 @@ int colisaoCirculoBloco(Bloco b, Circulo *c){
 
 	return colisao;
 }
+int colisaoTanqueBloco(Player *p, Map mapa){
+
+		if (colisaoCirculoBloco(mapa.central, &p->tanque.campoForca)==-1)
+		{
+			return 1;
+		} 
+		else if(mapa.id==2){
+			if (colisaoCirculoBloco(mapa.extra1, &p->tanque.campoForca)==-1 ||
+				colisaoCirculoBloco(mapa.extra2, &p->tanque.campoForca)==-1 )
+			{
+				return 1;
+			}
+		}
+		else if(mapa.id==3 || mapa.id==4){
+			if (colisaoCirculoBloco(mapa.extra1, &p->tanque.campoForca)==-1 ||
+				colisaoCirculoBloco(mapa.extra2, &p->tanque.campoForca)==-1 ||
+				colisaoCirculoBloco(mapa.extra3, &p->tanque.campoForca)==-1 ||
+				colisaoCirculoBloco(mapa.extra4, &p->tanque.campoForca)==-1 )
+			{
+				return 1;
+			}
+		}
+		return 0;
+}
+
+int colisaoAddOn(AddOn *addon, Map mapa, Player p1, Player p2){
+
+	if (colisaoCirculoBloco(mapa.central, &addon->corpo)!=0)
+	{
+		return 1;
+	} 
+	else if(mapa.id==2){
+		if (colisaoCirculoBloco(mapa.extra1, &addon->corpo)!=0 ||
+			colisaoCirculoBloco(mapa.extra2, &addon->corpo)!=0 )
+		{
+			return 1;
+		}
+	}
+	else if(mapa.id==3 || mapa.id==4){
+		if (colisaoCirculoBloco(mapa.extra1, &addon->corpo)!=0 ||
+			colisaoCirculoBloco(mapa.extra2, &addon->corpo)!=0 ||
+			colisaoCirculoBloco(mapa.extra3, &addon->corpo)!=0 ||
+			colisaoCirculoBloco(mapa.extra4, &addon->corpo)!=0 )
+		{
+			return 1;
+		}
+	}
+	else if (colisaoCirculos(addon->corpo,p1.tanque.campoForca)){
+		return 1;
+	}
+	else if (colisaoCirculos(addon->corpo,p2.tanque.campoForca)){
+		return 1;
+	}
+	else if (colisaoCirculoTela(&addon->corpo)){
+		return 1;
+	}
+	return 0;
+
+}
 
 void atira(Tanque *t)
 {
-	t->s.corpo.centro.x = t->A.x + t->centro.x;
-	t->s.corpo.centro.y = t->A.y + t->centro.y;
-	//if (!t->s.ativo){
+	if (!t->s.ativo){		
+		soundHandle(soundON, inst_shooting);
+		
+		t->s.corpo.centro.x = t->A.x + t->centro.x;
+		t->s.corpo.centro.y = t->A.y + t->centro.y;
+
 		t->s.vel_x = cos(t->angulo);
 		t->s.vel_y = sin(t->angulo);
 		t->s.ativo = 1;
-	//}
+	}
 }
 
 void atualizaTiro(Player *p, Map mapa)
 {
+	switch (p->p_addon.tipo){
+		case 3:
+			p->tanque.s.corpo.centro.y -= p->tanque.s.vel*p->tanque.s.vel_y*1.5;
+			p->tanque.s.corpo.centro.x -= p->tanque.s.vel*p->tanque.s.vel_x*1.5;
+		break;
+		case 4:
+			p->tanque.s.corpo.centro.y -= p->tanque.s.vel*p->tanque.s.vel_y/1.5;
+			p->tanque.s.corpo.centro.x -= p->tanque.s.vel*p->tanque.s.vel_x/1.5;
+		break;
+		default:
+			p->tanque.s.corpo.centro.y -= p->tanque.s.vel*p->tanque.s.vel_y;
+			p->tanque.s.corpo.centro.x -= p->tanque.s.vel*p->tanque.s.vel_x;
+		break;
+	}
+
 	if (p->tanque.s.ativo)
 	{
-		p->tanque.s.corpo.centro.y -= p->tanque.s.vel*p->tanque.s.vel_y;
-		p->tanque.s.corpo.centro.x -= p->tanque.s.vel*p->tanque.s.vel_x;
 
 		if (colisaoCirculoTela(&p->tanque.s.corpo) || 
 			colisaoCirculoBloco(mapa.central, &p->tanque.s.corpo)!=0)
@@ -556,12 +639,24 @@ void rotacionaTanque(Tanque *t)
 	}
 }
 
-void atualizaTanque(Player *p1, Player *p2, Map mapa)
+void atualizaTanque(Player *p1, Player *p2, Map mapa, AddOn *addon, int tempoJogo)
 {
 	rotacionaTanque(&p1->tanque);
 
-	p1->tanque.campoForca.centro.y += p1->tanque.vel*p1->tanque.y_comp;
-	p1->tanque.campoForca.centro.x += p1->tanque.vel*p1->tanque.x_comp;
+	switch (p1->p_addon.tipo){
+		case 1:
+			p1->tanque.campoForca.centro.y += 1.5*(p1->tanque.vel*p1->tanque.y_comp);
+			p1->tanque.campoForca.centro.x += 1.5*(p1->tanque.vel*p1->tanque.x_comp);
+		break;
+		case 2:
+			p1->tanque.campoForca.centro.y += (int)(p1->tanque.vel*p1->tanque.y_comp/1.5);
+			p1->tanque.campoForca.centro.x += (int)(p1->tanque.vel*p1->tanque.x_comp/1.5);
+		break;
+		default:
+			p1->tanque.campoForca.centro.y += p1->tanque.vel*p1->tanque.y_comp;
+			p1->tanque.campoForca.centro.x += p1->tanque.vel*p1->tanque.x_comp;
+		break;
+	}
 
 	colisaoCirculoTela(&p1->tanque.campoForca);
 
@@ -569,25 +664,10 @@ void atualizaTanque(Player *p1, Player *p2, Map mapa)
 	{
 		soundHandle(soundON, inst_colisaoTanques);
 		p1->tanque.campoForca.centro = p1->tanque.centro;
-	} else if (colisaoCirculoBloco(mapa.central,&p1->tanque.campoForca) == -1)
+	} 
+	else if (colisaoTanqueBloco(p1,mapa))
 	{
 		p1->tanque.campoForca.centro = p1->tanque.centro;
-	} 
-	else if (mapa.id==2) {
-		if (colisaoCirculoBloco(mapa.extra1,&p1->tanque.campoForca) == -1 || 
-			colisaoCirculoBloco(mapa.extra2,&p1->tanque.campoForca) == -1)
-		{
-			p1->tanque.campoForca.centro = p1->tanque.centro;
-		}
-	} 
-	else if (mapa.id==3 || mapa.id==4) {
-		if (colisaoCirculoBloco(mapa.extra1,&p1->tanque.campoForca) == -1 || 
-			colisaoCirculoBloco(mapa.extra2,&p1->tanque.campoForca) == -1 ||
-			colisaoCirculoBloco(mapa.extra3,&p1->tanque.campoForca) == -1 || 
-			colisaoCirculoBloco(mapa.extra4,&p1->tanque.campoForca) == -1)
-		{
-			p1->tanque.campoForca.centro = p1->tanque.centro;
-		}
 	}
 	
 	p1->tanque.centro = p1->tanque.campoForca.centro;
@@ -599,13 +679,42 @@ void atualizaTanque(Player *p1, Player *p2, Map mapa)
 			soundHandle(soundON, inst_colisaoTiroTanque);
 			p2->tanque.s.ativo = 0;
 			p2->pontos++;
+			do {
+				p1->tanque.centro.x = randomEntreNums(p1->tanque.campoForca.raio, SCREEN_W-p1->tanque.campoForca.raio);
+				p1->tanque.centro.y = randomEntreNums(p1->tanque.campoForca.raio, SCREEN_H-p1->tanque.campoForca.raio);
+				p1->tanque.campoForca.centro.x = p1->tanque.centro.x;
+				p1->tanque.campoForca.centro.y = p1->tanque.centro.y;
+			} while ((colisaoTanqueBloco(p1,mapa)) || 
+					(colisaoCirculos(p1->tanque.campoForca,p2->tanque.campoForca)));
 		}
 	}
+	
+	p1->p_addon.corpo.centro = p1->tanque.centro;
+	p1->p_addon.corpo.raio = p1->tanque.campoForca.raio;
+	
+	if (addon->tipo!=0){
+		if (colisaoCirculos(p1->tanque.campoForca, addon->corpo)){
+			p1->p_addon.tipo = addon->tipo;
+			p1->p_addon.addOnTime = tempoJogo;
+			addon->addOnTime = tempoJogo;
+			addon->tipo = 0;			
+		}
+	}
+	if (tempoJogo - p1->p_addon.addOnTime>=10){
+		p1->p_addon.tipo=0;
+	}
+	//pensar em como voltar ao normal
+	//mudar a parte de velocidade, tirar da função e colocar condições na atualizaTanque p componentes
+	//mudar a parte da velocidade do tiro, colocar condições na função atirar
 }
 
-int randomEntreNums(int menor, int maior){
-	return (menor + rand()%(1+maior-menor));
+void posicaoAleatoria(Circulo *corpo){
+	int cabo = 0;
+
+	corpo->centro.x = randomEntreNums(corpo->raio, SCREEN_W-corpo->raio);
+	corpo->centro.y = randomEntreNums(corpo->raio, SCREEN_H-corpo->raio);
 }
+
 //funcoes de menu
 void posicionaPointer(int *pointerPos, int *pointer_y){
 	if(*pointerPos>3){
@@ -651,6 +760,24 @@ void posicionaSelector(int *pos, int *selectorX, int id){
 	}
 	else if (id==3){
 		*selectorX = ((*pos)-1)*200 + 79;
+	}
+}
+
+void addOnText(Player p, char *c){
+	switch (p.p_addon.tipo)
+	{
+	case 1:
+		sprintf(c, "P%d moving faster", p.id);
+		break;
+	case 2:
+		sprintf(c, "P%d moving slowly", p.id);
+		break;
+	case 3:
+		sprintf(c, "P%d shooting faster", p.id);
+		break;
+	case 4:
+		sprintf(c, "P%d shooting slowly", p.id);
+		break;
 	}
 }
 
@@ -734,6 +861,10 @@ int main(int argc, char **argv){
 	//armazenas as fontes
 	originTech25 = al_load_font("fonts/OriginTech personal use.ttf", 25, 1);
 	if(originTech25 == NULL) {
+		fprintf(stderr, "font file does not exist or cannot be accessed!\n");
+	}
+	originTech14 = al_load_font("fonts/OriginTech personal use.ttf", 14, 1);
+	if(originTech14 == NULL) {
 		fprintf(stderr, "font file does not exist or cannot be accessed!\n");
 	}
 	spaceAge40 = al_load_font("fonts/space age.ttf", 40, 1);
@@ -877,16 +1008,27 @@ int main(int argc, char **argv){
 	Map mapa;
 	mapa.id = selectorMapPos;
 	initMapa(&mapa);
+
+	AddOn addOn;
+	addOn.corpo.raio = 10;
+	addOn.tipo = 0;
+	addOn.addOnTime = 0;
 	
-	char txtPlacar[15], txtVencedor[10], txtResultado[10];
+	char txtPlacar[15], txtVencedor[10], txtResultado[10], time[10];
 	char txtTotal1[3], txtTotal2[3], soundState[5], musicState[5];
-	char creditos[15], soundControl[25], musicControl[25];
+	char creditos[15], soundControl[25], musicControl[25], txtAddOn[25];
 	
 	sprintf(creditos, "@marcus.laia");
+	sprintf(time, "%d", (int)(al_get_timer_count(timer)/FPS));
 
 
 	//inicia o temporizador
 	al_start_timer(timer);
+
+	int tempoRef = 0;
+	int tempoPause = 0;
+	int tempoJogo = 0;
+	struct tm *tempo;
 
 	//1 - Menu
 	//2 - Escolha de Naves e Mapa
@@ -955,17 +1097,45 @@ int main(int argc, char **argv){
 				al_flip_display();
 			}
 			else if(playing == 3){
+
 				al_draw_bitmap(background, 0, 0, 0);
 				desenhaCenario(mapa);
-				
+
+				tempoJogo = (int)(al_get_timer_count(timer)/FPS)-tempoRef;				
+				tempo->tm_min = (int)(tempoJogo/60);
+				tempo->tm_sec = (int)(tempoJogo%60);
+				//addOn aparece
+				if (tempoJogo-addOn.addOnTime>=10 && addOn.tipo==0){
+					do{
+						addOn.corpo.centro.x = randomEntreNums(addOn.corpo.raio, SCREEN_W-addOn.corpo.raio);
+						addOn.corpo.centro.y = randomEntreNums(addOn.corpo.raio, SCREEN_H-addOn.corpo.raio);
+					} while (colisaoAddOn(&addOn,mapa,player_1,player_2));
+					addOn.tipo = randomEntreNums(1,4);	
+				}
+				//addon aparece
+				if (addOn.tipo!=0){
+					al_draw_filled_circle(addOn.corpo.centro.x, addOn.corpo.centro.y, addOn.corpo.raio, 
+										al_map_rgb(rand()%256,rand()%256,rand()%256));
+				}
+
 				sprintf(txtPlacar, "P1-%d x %d-P2", player_1.pontos, player_2.pontos);
-				al_draw_text(originTech25, al_map_rgb(0,0,0), SCREEN_W/2-72, SCREEN_H/2-15, 0, txtPlacar);
+				al_draw_text(originTech25, al_map_rgb(0,0,0), SCREEN_W/2-72, SCREEN_H/2-30, 0, txtPlacar);
+				strftime(time, 10, "%M:%S", tempo);				
+				al_draw_text(originTech25, al_map_rgb(0,0,0), SCREEN_W/2-35, SCREEN_H/2, 0, time);
 
-				atualizaTanque(&player_1, &player_2, mapa);
-				atualizaTanque(&player_2, &player_1, mapa);
+				if (player_1.p_addon.tipo!=0){
+					addOnText(player_1, txtAddOn);
+					al_draw_text(originTech14, al_map_rgb(0,0,0), SCREEN_W/2-78, SCREEN_H/2+30, 0, txtAddOn);					
+				} else if (player_2.p_addon.tipo){
+					addOnText(player_2, txtAddOn);
+					al_draw_text(originTech14, al_map_rgb(0,0,0), SCREEN_W/2-78, SCREEN_H/2+30, 0, txtAddOn);
+				}
 
-				desenhaTanque(player_1.tanque);
-				desenhaTanque(player_2.tanque);
+				atualizaTanque(&player_1, &player_2, mapa, &addOn, tempoJogo);
+				atualizaTanque(&player_2, &player_1, mapa, &addOn, tempoJogo);
+
+				desenhaTanque(player_1);
+				desenhaTanque(player_2);
 
 				if(player_1.pontos==5){					
 					winner = 1;
@@ -985,6 +1155,11 @@ int main(int argc, char **argv){
 					printf("\n%d segundos se passaram...", (int)(al_get_timer_count(timer)/FPS));
 			}
 			else if(playing == 4){
+				player_1.tanque.vel = 0;
+				player_1.tanque.vel_angular = 0;
+				player_2.tanque.vel = 0;
+				player_2.tanque.vel_angular = 0;
+				
 				al_draw_bitmap(pause,0,0,0);
 				posicionaPointerPause(&pausePointerPos, &pausePointer_y);				
 				al_draw_scaled_bitmap(pointer,
@@ -1052,7 +1227,7 @@ int main(int argc, char **argv){
 					}
 					else if(playing==2){
 						break;
-					} 
+					}
 					else if(playing==3){
 						player_1.tanque.vel -= VEL_TANQUE;
 					}
@@ -1113,7 +1288,6 @@ int main(int argc, char **argv){
 					} 
 					else if(playing==3){
 						atira(&player_1.tanque);
-						soundHandle(soundON, inst_shooting);
 					}
 
 					break;
@@ -1195,12 +1369,9 @@ int main(int argc, char **argv){
 					else if(playing==2){
 						selectorMapPos++;
 						soundHandle(soundON, inst_optionsNavigation);
-						mapa.id = selectorMapPos;
-						initMapa(&mapa);
 					} 
 					else if(playing==3){
 						atira(&player_2.tanque);
-						soundHandle(soundON, inst_shooting);
 					}
 
 					break;
@@ -1228,9 +1399,11 @@ int main(int argc, char **argv){
 							break;
 						}
 					} else if (playing==2){
-						//reseta as configuracoes dos players	
+						//reseta as configuracoes de jogo
 						initPlayer(&player_1);
 						initPlayer(&player_2);
+						addOn.tipo = 0; addOn.addOnTime = 0;
+						tempoRef = 0; tempoPause = 0; tempoJogo = 0;
 						//escolha de nave aleatoria
 						if (selectorP1pos==10){
 							selectorP1pos = randomEntreNums(1,9);
@@ -1300,11 +1473,16 @@ int main(int argc, char **argv){
 							player_2.tanque.spaceship = nave9;
 							break;
 						}
+						
+						mapa.id = selectorMapPos;
+						initMapa(&mapa);
 
 						playing=3;
+						tempoRef = (int)(al_get_timer_count(timer)/FPS);
 					
 					} else if(playing==3){
 						playing=4;
+						tempoPause = (int)(al_get_timer_count(timer)/FPS);
 						soundHandle(soundON, inst_openPause);
 					}
 					else if(playing==4){
@@ -1312,6 +1490,7 @@ int main(int argc, char **argv){
 						{
 						case 1:
 							playing=3;
+							tempoRef += ((int)(al_get_timer_count(timer)/FPS) - tempoPause);
 							pausePointerPos = 1;
 							soundHandle(soundON, inst_closePause);
 							break;
@@ -1356,10 +1535,12 @@ int main(int argc, char **argv){
 
 					if(playing==3){
 						playing=4;
+						tempoPause = (int)(al_get_timer_count(timer)/FPS);
 						soundHandle(soundON, inst_openPause);
 					}
 					else if(playing==4){
 						playing=3;
+						tempoRef += ((int)(al_get_timer_count(timer)/FPS) - tempoPause);
 						soundHandle(soundON, inst_closePause);
 					}
 					break;

@@ -10,7 +10,7 @@ INCLUDE_ALLEGRO=\include
 all: combat.exe
 
 combat.exe: combat.o
-	gcc -o combat.exe combat.o $(PATH_ALLEGRO)$(LIB_ALLEGRO)
+	gcc -o SpaceCombat.exe combat.o $(PATH_ALLEGRO)$(LIB_ALLEGRO)
 
 combat.o: combat.c
 	gcc -I $(PATH_ALLEGRO)$(INCLUDE_ALLEGRO) -c combat.c	
